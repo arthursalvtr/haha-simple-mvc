@@ -2,6 +2,9 @@
 
 namespace Core;
 
+use ReflectionMethod;
+use ReflectionClass;
+
 /**
  * Route
  */
@@ -39,11 +42,20 @@ class Route
 	protected function callAction($controller, $action)
 	{
 		$controller = $this->getController($controller);
+
+		$reflection = new ReflectionMethod($controller, $action);
+		$dependencies = [];
+		foreach ($reflection->getParameters() as $dependency) {
+			$class = $dependency->getClass();
+			if ($class) {
+				$dependencies[] = app($dependency->getName()) ? app($dependency->getName()) : App::build($class->name);
+			}
+		}
 		$controller = new $controller;
 		if (! method_exists($controller, $action)) {
 			throw new \Exception("$action does not exist in ".get_class($controller));
 		}
-		return $controller->$action();
+		return $reflection->invokeArgs($controller, $dependencies);
 	} 
 
 	public static function get($uri, $controller)

@@ -28,9 +28,23 @@ class App
 
 	public static function resolve($key)
 	{
-		if (! array_key_exists($key, static::getInstance()->context)) {
-			throw new \Exception("$key does not exists in App");
-		}
-		return static::getInstance()->context[$key];
+		// if (! array_key_exists($key, static::getInstance()->context)) {
+		// 	throw new \Exception("$key does not exists in App");
+		// }
+		return static::getInstance()->context[$key] ?? null;
+	}
+
+	public static function build($className) 
+	{
+	    $reflector = new \ReflectionClass($className);
+	    $constructor = $reflector->getConstructor();
+	    if (! $constructor || ! $constructor->getParameters()) {
+	    	return $reflector->newInstanceArgs();
+	    }
+	    foreach ($constructor->getParameters() as $dependency) {
+	        $instances[] = app($dependency->getName()) ? app($dependency->getName()) : static::build($dependency->getClass()->name);
+	    }
+
+	    return $reflector->newInstanceArgs($instances);
 	}
 }

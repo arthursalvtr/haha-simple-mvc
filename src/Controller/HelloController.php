@@ -2,6 +2,7 @@
 namespace App\Controller;
 
 use App\Models\User;
+use Core\Request;
 use Core\Response;
 
 /**
@@ -12,10 +13,9 @@ class HelloController
     /**
      * @return string
      */
-    public function index()
+    public function index(Request $request, Response $response)
 	{
-		
-		return Response::json(['mesg' => 'adfadsf']);
+		return $response->json(['mesg' => 'adfadsf', 'token' => $request->bearerToken(), 'input' => $request->input('hi')]);
 	}
 
 	public function home()
@@ -23,8 +23,8 @@ class HelloController
 		return view('index');
 	}
 
-	public function api()
+	public function api(Response $response)
 	{
-		return Response::json(['message' => 'Welcome']);
+		return $response->json(['message' => 'Welcome']);
 	}
 }
