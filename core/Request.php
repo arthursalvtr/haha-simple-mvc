@@ -36,12 +36,23 @@ class Request
 		return explode(',', $this->server['HTTP_ACCEPT']);
 	}
 
+	/**
+	 * Determine if the current request is asking for JSON in return.
+	 *
+	 * @return bool
+	 */
 	public function wantsJson(): bool
 	{
 		$acceptable = $this->getAcceptableContentTypes();
 	    return isset($acceptable[0]) && $acceptable[0] == 'application/json';
 	}
 
+	/**
+	 * Determines whether the current requests accepts a given content type.
+	 *
+	 * @param  string|array  $contentTypes
+	 * @return bool
+	 */
 	public function accepts($contentTypes)
 	{
 	    $accepts = $this->getAcceptableContentTypes();
@@ -60,6 +71,22 @@ class Request
 	        }
 	    }
 	    return false;
+	}
+
+	/**
+	 * Determine if the given content types match.
+	 *
+	 * @param  string  $actual
+	 * @param  string  $type
+	 * @return bool
+	 */
+	public static function matchesType($actual, $type)
+	{
+	    if ($actual === $type) {
+	        return true;
+	    }
+	    $split = explode('/', $actual);
+	    return isset($split[1]) && preg_match('#'.preg_quote($split[0], '#').'/.+\+'.preg_quote($split[1], '#').'#', $type);
 	}
 
 	/**
