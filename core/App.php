@@ -36,15 +36,27 @@ class App
 
 	public static function build($className) 
 	{
-	    $reflector = new \ReflectionClass($className);
-	    $constructor = $reflector->getConstructor();
-	    if (! $constructor || ! $constructor->getParameters()) {
-	    	return $reflector->newInstanceArgs();
-	    }
-	    foreach ($constructor->getParameters() as $dependency) {
-	        $instances[] = app($dependency->getName()) ? app($dependency->getName()) : static::build($dependency->getClass()->name);
-	    }
+        try {
+            $reflector = new \ReflectionClass($className);
+            if ($reflector->isInterface() && app($reflector->getName())) {
+                return app($reflector->getName());
+            }
+            if ($reflector->isInterface()) {
+                throw new \Exception("Interface {$reflector->getName()} is not registered within app");
+            }
+            $constructor = $reflector->getConstructor();
+            if (! $constructor || ! $constructor->getParameters()) {
+                return $reflector->newInstanceArgs();
+            }
+            foreach ($constructor->getParameters() as $dependency) {
+                $instances[] = app($dependency->getName()) ? app($dependency->getName()) : static::build($dependency->getClass()->name);
+            }
 
-	    return $reflector->newInstanceArgs($instances);
+            return $reflector->newInstanceArgs($instances);
+        } catch (\ReflectionException $e) {
+            dd($e);
+        } catch (\Exception $e) {
+            dd($e);
+        }
 	}
 }

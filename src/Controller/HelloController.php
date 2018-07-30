@@ -13,9 +13,13 @@ class HelloController
     /**
      * @return string
      */
-    public function index(Request $request, Response $response)
+    public function index(Response $response, User $user)
 	{
-		return $response->json(['mesg' => 'adfadsf', 'token' => $request->bearerToken(), 'input' => $request->input('hi')]);
+//	    $mysql = app('mysql');
+//        $user = new User($mysql);
+	    //	    $all = $mysql->select(['ajaja', 'ddddd', 'asdfaewrnm']);
+        dd($user);
+		return $response->json(['config' => config('source.db')]);
 	}
 
 	public function home()
